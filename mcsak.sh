@@ -31,8 +31,8 @@ SRV_DIR="/srv/mcserver"
 USERNAME="mcServer"
 
 #Directory where backups will be held.
-#Default is "$SRV_DIR/backup"
-BACKUP_DIR="$SRV_DIR/backup"
+#Default is "/home/$USERNAME/backup"
+BACKUP_DIR="/home/$USERNAME/mcbackup"
 
 # Number of CPU cores to thread across if using multithreaded garbage collection.
 #Default "1"
@@ -44,6 +44,18 @@ CPU_COUNT="1"
 #Defaults "1024M"
 INITRAM="1024M"
 MAXRAM="1024M"
+
+#CRONJOBS TO ADD DURING INSTALL
+CRONCMD_BACKUP="/$SRV_DIR/bin/script.servermgmt minecraft backup"
+CRONJOB_BACKUP="0  *  *   *   * $CRONCMD_BACKUP"
+CRONCMD_BACKUPROTATE="/$SRV_DIR/bin/rotate_backups.py > /dev/null"
+CRONJOB_BACKUPROTATE="30  *  *  * * $CRONCMD_BACKUPROTATE"
+CRONCMD_LOGROLL="/$SRV_DIR/bin/script.servermgmt log-roll"
+CRONJOB_LOGROLL="55  04  *   *   * $CRONCMD_LOGROLL"
+CRONCMD_TODISK="/$SRV_DIR/bin/script.servermgmt to-disk"
+CRONJOB_TODISK="*/15   *  *  *  * $CRONCMD_TODISK"
+CRONCMD_RESTART="/$SRV_DIR/bin/script.servermgmt restart"
+CRONJOB_RESTART="5  05  *  *  *  $CRONCMD_RESTART"
 
 ## WARNING!!!! DO NOT EDIT BELOW THIS LINE ##
 
@@ -279,20 +291,31 @@ do
             sudo apt-get install screen tar rsync
             echo -e "\e[2;32mAdding Minecraft Server User $USERNAME";
             echo -e "\e[2;1;31mPlease enter a strong password when prompted."
+            echo -e "\e[2;97m";
             sudo adduser $USERNAME --force-badname
             echo -e "\e[2;32mCreating Minecraft Server Directory in $SRV_DIR";
             echo -e "\e[2;97m";
             sudo mkdir -p $SRV_DIR/bin
+            sudo mkdir -p $SRV_DIR/world_storage
+            echo -e "\e[2;32mCreating Minecraft Server Backup Directory in $BACKUP_DIR";
+            echo -e "\e[2;97m";
+            sudo mkdir -p $BACKUP_DIR
+            sudo mkdir -p $BACKUP_DIR/logs
+            sudo mkdir -p $BACKUP_DIR/server
+            sudo mkdir -p $BACKUP_DIR/worlds
+            sudo mkdir -p $BACKUP_DIR/latest
+            sudo mkdir -p $BACKUP_DIR/archive
             echo -e "\e[2;32mSetting Permissions for $SRV_DIR for first server run";
             echo -e "\e[2;97m";
             sudo chmod 777 -R $SRV_DIR
+            sudo chmod 777 -R $BACKUP_DIR
             echo -e "\e[2;32mAdding User - $CUR_USR to $USERNAME group."
             sudo usermod -a -G $USERNAME $CUR_USR
             echo -e "\e[2;32mDownloading Vanilla Minecraft Server .jar to $SRV_DIR"
             echo -e "\e[2;97m";
             wget https://s3.amazonaws.com/Minecraft.Download/versions/1.8.1/minecraft_server.1.8.1.jar -O $SRV_DIR/minecraft_server.jar
-            echo -e "Mojang EULA can be read at (https://account.mojang.com/documents/minecraft_eula)."
-            read -p "Press the [Enter] key to accept the EULA.";
+            echo -e "\e[2;32mMojang EULA can be read at (https://account.mojang.com/documents/minecraft_eula)."
+            read -p "\e[2;97mPress the [Enter] key to accept the EULA.";
             echo eula=true >> $SRV_DIR/eula.txt
             echo -e "\e[2;32mStarting the server for the first time."
             for i in {77..76} {76..77} ; do echo -en "\e[38;5;${i}m################\e[0m" ; done ; echo
@@ -300,31 +323,39 @@ do
             read -p "Press the [Enter] key when you have read the instructions.";
             cd $SRV_DIR
             java -Xmx1024M -Xms1024M -jar minecraft_server.jar nogui
-            echo -e "\e[2;32mFetching the init script for Vanilla Minecraft Server."
+            echo -e "\e[2;32mFetching the scripts for Minecraft Server."
             echo -e "\e[2;97m";
-            wget http://www.icarey.net/minecraft/init.mcserver -O $SRV_DIR/bin/init.mcserver
+            wget http://www.icarey.net/minecraft/mcscripts.tar.gz -O $SRV_DIR/bin/mcscripts.tar.gz
+            cd $SRV_DIR/bin
+            tar -xvzf mcscripts.tar.gz
             echo -e "\e[2;32mGenerating init script config for Vanilla Minecraft Server."
             echo -e "\e[2;97m";
             echo '#!/bin/bash
 #
-# Configuration file for init.mcserver  ================================
+# Settings file for minecraft-init
+# ================================
 #
+# Make a copy of this file named config
+# and edit the variables to your needs.
 #
 
-# Name of vanilla server jar (no need to change if youre running craftbukkit and vice versa)
+# Name of vanilla server jar (no need to change if you are running craftbukkit and vice versa)
 MC_JAR="minecraft_server.jar"
 
 # Name of craftbukkit jar
-CB_JAR="spigot.jar"
+CB_JAR="craftbukkit.jar"
+
+# Name of the spigot jar
+SP_JAR="spigot.jar"
 
 # Define the release of CraftBukkit to use (stable or unstable)
 CB_RELEASE="stable"
 
 # Name of server.jar to use (either $MC_JAR or $CB_JAR)
-SERVICE=$CB_JAR
+SERVICE=$MC_JAR
 
 # Name to use for the screen instance
-SCREEN="mcServer_screen"
+SCREEN="mcServer"
 
 # User that should run the server
 USERNAME="'"$USERNAME"'"
@@ -335,43 +366,66 @@ MCPATH="'"$SRV_DIR"'"
 # Path to server log file ($MCPATH/server.log on older versions)
 SERVERLOG="${MCPATH}/logs/latest.log"
 
-# Where the worlds are located on the disk. Can not be the same as MCPATH. You need to move your worlds to this directory manually, the script will then handle the nessessay symlinks.
-WORLDSTORAGE="${MCPATH}/worlds"
+# Where the worlds are located on the disk. Can not be the same as MCPATH.
+# You need to move your worlds to this directory manually, the script
+# will then handle the nessessay symlinks.
+WORLDSTORAGE="${MCPATH}/world_storage"
 
 # Number of CPUs/cores to use
 CPU_COUNT='"$CPU_COUNT"'
 
 # Initial memory usage
-INITMEM="'"INITRAM"'"
+INITMEM="'"$INITRAM"'"
 
-# Maximum amount of memory to use Remember: give the ramdisk enough space, subtract from the total amount of RAM available the size of your map and the RAM-consumption of your base system.
-MAXMEM="'"MAXRAM"'"
+# Maximum amount of memory to use
+# Remember: give the ramdisk enough space, subtract from the total amount
+# of RAM available the size of your map and the RAM-consumption of your base system.
+MAXMEM="'"$MAXRAM"'"
 
-# Settings for backups =============================== Location for world backups
+
+# Settings for backups
+# ===============================
+
+# Location for world backups
 BACKUPPATH="'"$BACKUP_DIR"'/worlds"
 
-# Where the whole minecraft directory is copied when whole-backup is executed whole-backup is a complete uncompressed backup of the whole server folder.
+# Where the whole minecraft directory is copied when whole-backup is executed
+# whole-backup is a complete uncompressed backup of the whole server folder.
 WHOLEBACKUP="'"$BACKUP_DIR"'/server"
 
 # Format for world backup (tar or zip).
 BACKUPFORMAT="tar"
 
-# Normally backups will be put in a subfolder to $BACKUPPATH with todays date and the backups themselves will have a timestamp. But if BACKUPSCRIPTCOMPATIBLE is set the world backups will be put directly in $BACKUPPATH without
-# timestamp to be compatible with [backup rotation script](https://github.com/adamfeuer/rotate-backups)
+# Normally backups will be put in a subfolder to $BACKUPPATH with todays date
+# and the backups themselves will have a timestamp.
+
+# But if BACKUPSCRIPTCOMPATIBLE is set the world backups will be put directly
+# in $BACKUPPATH without timestamp to be compatible with
+# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
 #
 BACKUPSCRIPTCOMPATIBLE=YES
-# If WORLDEDITCOMPATIBLE is set the world backups will be created compatible to WorldEdit in $BACKUPPATH as WORLD_NAME/DATE.(tar.bz2|zip) with the requested directory structure
+
+# If WORLDEDITCOMPATIBLE is set the world backups will be created compatible to WorldEdit
+# in $BACKUPPATH as WORLD_NAME/DATE.(tar.bz2|zip) with the requested directory structure
 #
-# WORLDEDITCOMPATIBLE=YES Compress the whole backup with bzip2? Note that this may not save a lot of disk space since there can be a lot of files in your server directory, that are already compressed, but it can slow down the
+# WORLDEDITCOMPATIBLE=YES
+
+# Compress the whole backup with bzip2?
+# Note that this may not save a lot of disk space since there can be a lot of files
+# in your server directory, that are already compressed, but it can slow down the
 # backup a bit. This highly depends on the plugins you are using.
 #
-# For example: The png files generated by Dynmap are already compressed and still use a lot of space in your server directory, so the compression ratio of the compressed backup will not be very high.
+# For example: The png files generated by Dynmap are already compressed and still use
+# a lot of space in your server directory, so the compression ratio of the compressed
+# backup will not be very high.
 COMPRESS_WHOLEBACKUP=YES
 
 
-# Settings for log rolling ===============================
+# Settings for log rolling
+# ===============================
 
-# Location for old logs Used by the log-roll command
+# Location for old logs
+# Used by the log-roll command
 LOGPATH="'"$BACKUP_DIR"'/logs"
 
 # Whether or not to gzip logs (must be commented out for no - DO NOT CHANGE TO NO)
@@ -381,21 +435,57 @@ GZIPLOGS=YES
 # What to append to the logfile name (Leave blank for nothing)
 LOGFILEAPPEND="logfile_"
 
-# Things to leave alone ;) =====================
+
+# Settings for overviewer command
+# ===============================
+
+# Where the Map is generated
+OUTPUTMAP="/home/'"${USERNAME}"'/mc-overviewer/render"
+
+# Path to Minecraft-Overviewer
+OVPATH="/home/'"${USERNAME}"'/mc-overviewer/Minecraft-Overviewer"
+
+# Path for the config file of Overviewer
+OVCONFIGPATH="/home/'"${USERNAME}"'/mc-overviewer"
+
+# Name of Overviewer config file
+OVCONFIGNAME="config.py"
+
+# Path for backup worlds
+OVBACKUP="/home/'"${USERNAME}"'/mc-overviewer/overviewerbackups"
+
+# Things to leave alone ;)
+# =====================
+
 INVOCATION="java -Xmx$MAXMEM -Xms$INITMEM -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_COUNT -XX:+AggressiveOpts -jar $SERVICE nogui"
 
 # Path to the the mounted ramdisk (the default will work in most senarios).
-RAMDISK="/dev/shm"' | tee $SRV_DIR/bin/init.mcserver.config
+RAMDISK="/dev/shm"' | tee $SRV_DIR/bin/config
+                echo '[Settings]
+backups_dir = '"$BACKUP_DIR"'/latest/
+archives_dir = '"$BACKUP_DIR"'/archives/
+hourly_backup_hour = 23
+weekly_backup_day = 6
+max_weekly_backups = 52
+backup_extensions = "tar.gz",".tar.bz2",".jar"
+log_level = ERROR' | tee /home/$USERNAME/.rotate-backupsrc
                 clear
-                echo -e "Installing Server Init Script."
+                echo -e "\e[2;1;32mInstalling Default Cronjobs in Crontab.";
+                echo -e "\e[2;1;97m"
                 sleep 2
-                sudo ln -s $SRV_DIR/bin/init.mcserver /etc/init.d/mcserver
-                sudo update-rc.d mcserver defaults
-                echo -e "Setting permissions on $SRV_DIR and Init Script."
+                sudo -u $USERNAME ( crontab -l | grep -v "$CRONCMD_BACKUP" ; echo "$CRONJOB_BACKUP" ) | crontab -
+                sudo -u $USERNAME ( crontab -l | grep -v "$CRONCMD_LOGROLL" ; echo "$CRONJOB_LOGROLL" ) | crontab -
+                sudo -u $USERNAME ( crontab -l | grep -v "$CRONCMD_TODISK" ; echo "$CRONJOB_TODISK" ) | crontab -
+                sudo -u $USERNAME ( crontab -l | grep -v "$CRONCMD_BACKUPROTATE" ; echo "$CRONJOB_BACKUPROTATE" ) | crontab -
+                sudo -u $USERNAME ( crontab -l | grep -v "$CRONCMD_RESTART" ; echo "$CRONJOB_RESTART" ) | crontab -
+                echo -e "\e[2;1;32mSetting permissions on $SRV_DIR and Init Script."
+                echo -e "\e[2;1;97m"
                 sleep 2
-                sudo chmod 770 -R $SRV_DIR
+                sudo chmod 755 -R $SRV_DIR
+                sudo chmod 755 -R $BACKUP_DIR
                 sudo chown $USERNAME:$USERNAME -R $SRV_DIR
-                sudo chmod +x -R $SRV_DIR/script.*
+                sudo chown $USERNAME:$USERNAME -R $BACKUP_DIR
+                sudo chmod a+x -R $SRV_DIR/bin/script.*
                 echo -e "\e[2;1;32mFinished!\e[0m";
                 echo -e "\e[2;1;97m"
                 read -p "Press the [Enter] key to continue.";
