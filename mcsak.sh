@@ -38,6 +38,9 @@ BACKUP_DIR="/home/$USERNAME/mcbackup"
 #Default "1"
 CPU_COUNT="1"
 
+#Server Name
+SRVNAME="mcServer"
+
 #Server RAM
 #If using more than 4GB of RAM  enable Hugepages in the OS, and on the SRV_PARAMS;
 #line by adding the -XX:+UseLargePages flag.
@@ -48,7 +51,7 @@ MAXRAM="1024M"
 #CRONJOBS TO ADD DURING INSTALL
 CRONCMD_BACKUP="/$SRV_DIR/bin/script.servermgmt minecraft backup"
 CRONJOB_BACKUP="0  *  *   *   * $CRONCMD_BACKUP"
-CRONCMD_BACKUPROTATE="/$SRV_DIR/bin/rotate_backups.py > /dev/null"
+CRONCMD_BACKUPROTATE="/$SRV_DIR/bin/rotate-backups.py > /dev/null"
 CRONJOB_BACKUPROTATE="30  *  *  * * $CRONCMD_BACKUPROTATE"
 CRONCMD_LOGROLL="/$SRV_DIR/bin/script.servermgmt log-roll"
 CRONJOB_LOGROLL="55  04  *   *   * $CRONCMD_LOGROLL"
@@ -239,17 +242,20 @@ do
             while [ $_repeat = "Y" ]
             do
                     # Do whatever your tasks are
-                    echo -e "Enter the name of the user you want to own the server process. Default is  $USERNAME"
+                    echo -e "Enter the name of the user you want to own the server process. Default is mcServer"
                     read NEWUSERNAME
                     [ -n "$NEWUSERNAME" ] && USERNAME=$NEWUSERNAME
-                    echo -e "Enter the path of the directory where the server should reside. Default is $SRV_DIR"
+                    echo -e "Enter the name of the server. Default is mcServer"
+                    read NEWUSRVNAME
+                    [ -n "$NEWSRVNAME" ] && USERNAME=$NEWSRVNAME
+                    echo -e "Enter the path of the directory where the server should reside. Default is /srv/mcServer"
                     read NEWSRV_DIR
                     [ -n "$NEWSRV_DIR" ] && SRV_DIR=$NEWSRV_DIR
-                    echo -e "Enter the path for the directory where backups will be stored. Default is  $BACKUP_DIR"
+                    echo -e "Enter the path for the directory where backups will be stored. Default is /home/$USERNAME/mcbackups"
                     read NEWBACKUP_DIR
                     [ -n "$NEWBACKUP_DIR" ] && BACKUP_DIR=$NEWBACKUP_DIR
                     # Prompt for repeat
-                    echo -e "You Entered:\nUser: $USERNAME\nServer Directory: $SRV_DIR\nBackup Directory: $BACKUP_DIR"
+                    echo -e "You Entered:\nUser: $USERNAME\nServer Name: $SRVNAME\nServer Directory: $SRV_DIR\nBackup Directory: $BACKUP_DIR"
                     echo -n "Is this correct? (Y/N)"
                     read -n1 Input
                     echo # Completes the line
@@ -469,6 +475,7 @@ weekly_backup_day = 6
 max_weekly_backups = 52
 backup_extensions = "tar.gz",".tar.bz2",".jar"
 log_level = ERROR' | tee /home/$USERNAME/.rotate-backupsrc
+                sudo -u $USERNAME echo "alias $SRVNAME = $SRV_DIR/bin/script.servermgmt.sh" >> ~/.bashrc
                 clear
                 echo -e "\e[2;1;32mInstalling Default Cronjobs in Crontab.";
                 echo -e "\e[2;1;97m"
@@ -485,7 +492,7 @@ log_level = ERROR' | tee /home/$USERNAME/.rotate-backupsrc
                 sudo chmod 755 -R $BACKUP_DIR
                 sudo chown $USERNAME:$USERNAME -R $SRV_DIR
                 sudo chown $USERNAME:$USERNAME -R $BACKUP_DIR
-                sudo chmod a+x -R $SRV_DIR/bin/script.*
+                sudo chmod a+x -R $SRV_DIR/bin/*
                 echo -e "\e[2;1;32mFinished!\e[0m";
                 echo -e "\e[2;1;97m"
                 read -p "Press the [Enter] key to continue.";
