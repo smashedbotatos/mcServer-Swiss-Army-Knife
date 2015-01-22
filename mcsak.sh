@@ -22,43 +22,6 @@
 #       User Configuration         #
 #----------------------------------#
 
-# Directory the server files are located in.
-#Default is  "/srv/mcServer"
-SRV_DIR="/srv/mcServer"
-
-#User that will run the server process.
-#Default is mcServer
-USERNAME="mcServer"
-
-#Directory where backups will be held.
-#Default is "/home/$USERNAME/backup"
-BACKUP_DIR="/home/$USERNAME/mcbackup"
-
-# Number of CPU cores to thread across if using multithreaded garbage collection.
-#Default "1"
-CPU_COUNT="1"
-
-#Server Name
-SRVNAME="mcServer"
-
-#Server RAM
-#If using more than 4GB of RAM  enable Hugepages in the OS, and on the SRV_PARAMS;
-#line by adding the -XX:+UseLargePages flag.
-#Defaults "1024M"
-INITRAM="512M"
-MAXRAM="1024M"
-
-#CRONJOBS TO ADD DURING INSTALL
-CRONCMD_BACKUP="$SRV_DIR/bin/script.servermgmt minecraft backup"
-CRONJOB_BACKUP="0  *  *   *   * $CRONCMD_BACKUP"
-CRONCMD_BACKUPROTATE="$SRV_DIR/bin/rotate-backups.py > /dev/null"
-CRONJOB_BACKUPROTATE="30  *  *  * * $CRONCMD_BACKUPROTATE"
-CRONCMD_LOGROLL="$SRV_DIR/bin/script.servermgmt log-roll"
-CRONJOB_LOGROLL="55  04  *   *   * $CRONCMD_LOGROLL"
-CRONCMD_TODISK="$SRV_DIR/bin/script.servermgmt to-disk"
-CRONJOB_TODISK="*/15   *  *  *  * $CRONCMD_TODISK"
-CRONCMD_RESTART="$SRV_DIR/bin/script.servermgmt restart"
-CRONJOB_RESTART="5  05  *  *  *  $CRONCMD_RESTART"
 
 ## WARNING!!!! DO NOT EDIT BELOW THIS LINE ##
 
@@ -243,19 +206,19 @@ do
             while [ $_repeat = "Y" ]
             do
                     # Do whatever your tasks are
-                    echo -e "\e[1;32mEnter the name of the user you want to own the server process. Default is mcServer"
+                    echo -e "\e[1;32mEnter the name of the user you want to own the server process. Example -  mcServer"
                     echo -e "\e[2;97m";
                     read NEWUSERNAME
                     [ -n "$NEWUSERNAME" ] && USERNAME=$NEWUSERNAME
-                    echo -e "\e[1;32mEnter the name of the server. Default is mcServer"
+                    echo -e "\e[1;32mEnter the name of the server. Example - mcServer_Creative"
                     echo -e "\e[2;97m";
                     read NEWSRVNAME
                     [ -n "$NEWSRVNAME" ] && SRVNAME=$NEWSRVNAME
-                    echo -e "\e[1;32mEnter the path of the directory where the server should reside. Default is /srv/mcServer"
+                    echo -e "\e[1;32mEnter the path of the directory where the server should reside. Example - /srv/minecraft_server"
                     echo -e "\e[2;97m";
                     read NEWSRV_DIR
                     [ -n "$NEWSRV_DIR" ] && SRV_DIR=$NEWSRV_DIR
-                    echo -e "\e[1;32mEnter the path for the directory where backups will be stored. Default is /home/mcServer/mcbackups"
+                    echo -e "\e[1;32mEnter the path for the directory where backups will be stored. Example - /home/mcServer/mcbackups"
                     echo -e "\e[2;97m";
                     read NEWBACKUP_DIR
                     [ -n "$NEWBACKUP_DIR" ] && BACKUP_DIR=$NEWBACKUP_DIR
@@ -276,17 +239,19 @@ do
             while [ $_repeat = "Y" ]
             do
                     # Do whatever your tasks are
-                    echo -e "\e[1;32mEnter the number of CPU cores you have. Default is  $CPU_COUNT"
+                    echo -e "\e[1;32mEnter the number of CPU cores you have. Example - 2"
                     echo -e "\e[2;97m";
                     read NEWCPU_COUNT
                     [ -n "$NEWCPU_COUNT" ] && CPU_COUNT=$NEWCPU_COUNT
-                    echo -e "\e[1;32mEnter the initial RAM amount to dedicate to the server in Megabytes or Gigabytes. Default is $INITRAM"
+                    echo -e "\e[1;32mEnter the initial RAM amount to dedicate to the server in Megabytes or Gigabytes."
                     echo -e "Please specify with a M or G after the size."
+                    echo -e "Example - 1024M or 1G"
                     echo -e "\e[2;97m";
                     read NEWINITRAM
                     [ -n "$NEWINITRAM" ] && INITRAM=$NEWINITRAM
-                    echo -e "\e[1;32mEnter the maximum RAM amount to dedicate to the server in Megabytes or Gigabytes. Default is  $MAXRAM"
+                    echo -e "\e[1;32mEnter the maximum RAM amount to dedicate to the server in Megabytes or Gigabytes."
                     echo -e "Please specify with a M or G."
+                    echo -e "Example - 4096M or 4G"
                     echo -e "\e[2;97m";
                     read NEWMAXRAM
                     [ -n "$NEWMAXRAM" ] && MAXRAM=$NEWMAXRAM
@@ -303,6 +268,24 @@ do
                     esac
             done
 
+####################################
+###CRONJOBS TO ADD DURING INSTALL###
+####################################
+CRONCMD_BACKUP="$SRV_DIR/bin/script.servermgmt.sh minecraft backup"
+CRONJOB_BACKUP="0  *  *  *  * $CRONCMD_BACKUP"
+CRONCMD_BACKUPROTATE="$SRV_DIR/bin/rotate-backups.py > /dev/null"
+CRONJOB_BACKUPROTATE="30  *  *  *  * $CRONCMD_BACKUPROTATE"
+CRONCMD_LOGROLL="$SRV_DIR/bin/script.servermgmt.sh log-roll"
+CRONJOB_LOGROLL="55  04  *  *  * $CRONCMD_LOGROLL"
+CRONCMD_TODISK="$SRV_DIR/bin/script.servermgmt to-disk"
+CRONJOB_TODISK="*/15  *  *  *  * $CRONCMD_TODISK"
+CRONCMD_WARN="$SRV_DIR/bin/script.servermgmt.sh say SERVER RESTART IN 5 MINUTES"
+CRONJOB_WARN="0  05  *  *  * $CRONCMD_WARN"
+CRONCMD_RESTART="$SRV_DIR/bin/script.servermgmt.sh restart"
+CRONJOB_RESTART="5  05  *  *  * $CRONCMD_RESTART"
+#Moved here to read variable from user input
+############################################
+
             echo -e "\e[1;31mThis requires root access:";
 	    echo -e "\e[1;32mInstalling dependencies; screen, tar, and rsync.";
             echo -e "\e[2;97m";
@@ -311,30 +294,26 @@ do
             echo -e "\e[1;32mAdding Minecraft Server User $USERNAME";
             echo -e "\e[1;36mPlease enter a strong password when prompted."
             echo -e "\e[2;97m";
-            sleep .5
+            sleep 1
             sudo adduser $USERNAME --force-badname
             echo -e "\e[1;32mCreating Minecraft Server Directory in $SRV_DIR";
             echo -e "\e[2;97m";
             sudo mkdir -p $SRV_DIR/bin
             sudo mkdir -p $SRV_DIR/world_storage
-            sleep .5
+            sleep 1
             echo -e "\e[1;32mCreating Minecraft Server Backup Directory in $BACKUP_DIR";
             echo -e "\e[2;97m";
             sudo mkdir -p $BACKUP_DIR
             sudo mkdir -p $BACKUP_DIR/logs
             sudo mkdir -p $BACKUP_DIR/server
-            sudo mkdir -p $BACKUP_DIR/worlds
             sudo mkdir -p $BACKUP_DIR/latest
-            sudo mkdir -p $BACKUP_DIR/archive
-            sleep .5
+            sudo mkdir -p $BACKUP_DIR/archives
+            sleep 1
             echo -e "\e[1;32mSetting Permissions for $SRV_DIR for first server run";
             echo -e "\e[1;97m";
             sudo chmod 777 -R $SRV_DIR
             sudo chmod 777 -R $BACKUP_DIR
-            sleep .5
-            echo -e "\e[1;32mAdding User - $CUR_USR to $USERNAME group."
-            sudo usermod -a -G $USERNAME $CUR_USR
-            sleep .5
+            sleep 1.5
             echo -e "\e[1;32mDownloading Vanilla Minecraft Server .jar to $SRV_DIR"
             echo -e "\e[1;97m";
             wget https://s3.amazonaws.com/Minecraft.Download/versions/1.8.1/minecraft_server.1.8.1.jar -O $SRV_DIR/minecraft_server.jar
@@ -342,7 +321,7 @@ do
             echo -e "\e[1;36m";
             read -p "Press the [Enter] key to accept the EULA.";
             echo eula=true >> $SRV_DIR/eula.txt
-            sleep 3
+            sleep 2
             clear
             echo -e "\e[1;32mStarting the server for the first time."
             for i in {77..76} {76..77} ; do echo -en "\e[38;5;${i}m################\e[0m" ; done ; echo
@@ -358,7 +337,7 @@ do
             tar -xvzf mcscripts.tar.gz
             rm mcscripts.tar.gz
             sleep .5
-            echo -e "\e[1;32mGenerating init script config for Vanilla Minecraft Server."
+            echo -e "\e[1;32mGenerating Server Management config for Vanilla Minecraft Server."
             echo -e "\e[2;97m";
             sleep 2
             echo '#!/bin/bash
@@ -413,309 +392,14 @@ INITMEM="'"$INITRAM"'"
 # of RAM available the size of your map and the RAM-consumption of your base system.
 MAXMEM="'"$MAXRAM"'"
 
+# Whether to output commands for the plugin ConsoleLikeChat ($1 is the command to run)
+FORMAT='"'"'$1'"'"'
 
 # Settings for backups
 # ===============================
 
 # Location for world backups
-BACKUPPATH="'"$BACKUP_DIR"'/worlds"
-
-# Where the whole minecraft directory is copied when whole-backup is executed
-# whole-backup is a complete uncompressed backup of the whole server folder.
-WHOLEBACKUP="'"$BACKUP_DIR"'/server"
-
-# Format for world backup (tar or zip).
-BACKUPFORMAT="tar"
-
-# Normally backups will be put in a subfolder to $BACKUPPATH with todays date
-# and the backups themselves will have a timestamp.
-
-# But if BACKUPSCRIPTCOMPATIBLE is set the world backups will be put directly
-# in $BACKUPPATH without timestamp to be compatible with
-# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
-#
-BACKUPSCRIPTCOMPATIBLE=YES
-
-# If WORLDEDITCOMPATIBLE is set the world backups will be created compatible to WorldEdit
-# in $BACKUPPATH as WORLD_NAME/DATE.(tar.bz2|zip) with the requested directory structure
-#
-# WORLDEDITCOMPATIBLE=YES
-
-# Compress the whole backup with bzip2?
-# Note that this may not save a lot of disk space since there can be a lot of files
-# in your server directory, that are already compressed, but it can slow down the
-# backup a bit. This highly depends on the plugins you are using.
-#
-# For example: The png files generated by Dynmap are already compressed and still use
-# a lot of space in your server directory, so the compression ratio of the compressed
-# backup will not be very high.
-COMPRESS_WHOLEBACKUP=YES
-
-
-# Settings for log rolling
-# ===============================
-
-# Location for old logs
-# Used by the log-roll command
-LOGPATH="'"$BACKUP_DIR"'/logs"
-
-# Whether or not to gzip logs (must be commented out for no - DO NOT CHANGE TO NO)
-#
-GZIPLOGS=YES
-
-# What to append to the logfile name (Leave blank for nothing)
-LOGFILEAPPEND="logfile_"
-
-
-# Settings for overviewer command
-# ===============================
-
-# Where the Map is generated
-OUTPUTMAP="/home/'"${USERNAME}"'/mc-overviewer/render"
-
-# Path to Minecraft-Overviewer
-OVPATH="/home/'"${USERNAME}"'/mc-overviewer/Minecraft-Overviewer"
-
-# Path for the config file of Overviewer
-OVCONFIGPATH="/home/'"${USERNAME}"'/mc-overviewer"
-
-# Name of Overviewer config file
-OVCONFIGNAME="config.py"
-
-# Path for backup worlds
-OVBACKUP="/home/'"${USERNAME}"'/mc-overviewer/overviewerbackups"
-
-# Things to leave alone ;)
-# =====================
-
-INVOCATION="java -Xmx$MAXMEM -Xms$INITMEM -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:ParallelGCThreads=$CPU_COUNT -XX:+AggressiveOpts -jar $SERVICE nogui"
-
-# Path to the the mounted ramdisk (the default will work in most senarios).
-RAMDISK="/dev/shm"' | tee $SRV_DIR/bin/config
-                sudo -su $USERNAME echo '[Settings]
-backups_dir = '"$BACKUP_DIR"'/latest/
-archives_dir = '"$BACKUP_DIR"'/archives/
-hourly_backup_hour = 23
-weekly_backup_day = 6
-max_weekly_backups = 52
-backup_extensions = "tar.gz",".tar.bz2",".jar"
-log_level = ERROR' | sudo -u $USERNAME tee /home/$USERNAME/.rotate-backupsrc
-                echo "alias $SRVNAME=$SRV_DIR/bin/script.servermgmt.sh" | sudo -u $USERNAME tee /home/$USERNAME/.bash_aliases
-                echo "alias $SRVNAME=$SRV_DIR/bin/script.servermgmt.sh" >> ~/.bash_aliases
-                clear
-                echo -e "\e[1;32mInstalling Default Cronjobs in Crontab.";
-                echo -e "\e[1;97m"
-                sleep 1
-               echo '( crontab -l | grep -v "'"$CRONCMD_BACKUP"'" ; echo "'"$CRONJOB_BACKUP"'" ) | crontab -
-( crontab -l | grep -v "'"$CRONCMD_LOGROLL"'" ; echo "'"$CRONJOB_LOGROLL"'" ) | crontab -
-( crontab -l | grep -v "'"$CRONCMD_TODISK"'" ; echo "'"$CRONJOB_TODISK"'" ) | crontab -
-( crontab -l | grep -v "'"$CRONCMD_BACKUPROTATE"'" ; echo "'"$CRONJOB_BACKUPROTATE"'" ) | crontab -
-( crontab -l | grep -v "'"$CRONCMD_RESTART"'" ; echo "'"$CRONJOB_RESTART"'" ) | crontab -' > $SRV_DIR/bin/cron.sh
-                cd $SRV_DIR/bin
-                sudo -u $USERNAME bash cron.sh
-                rm cron.sh
-                echo -e "\e[1;32mIf there is no Crontab, Crontab will use a blank file"
-                echo -e "\e[1;32mSetting permissions on $SRV_DIR and Init Script."
-                echo -e "\e[2;1;97m"
-                sleep 2
-                cd $SRV_DIR
-                mv world $SRV_DIR/world_storage/
-                sudo chmod 755 -R $SRV_DIR
-                sudo chmod 755 -R $BACKUP_DIR
-                sudo chown $USERNAME:$USERNAME -R $SRV_DIR
-                sudo chown $USERNAME:$USERNAME -R $BACKUP_DIR
-                sudo chmod a+x -R $SRV_DIR/bin/*
-                echo -e "\e[1;32mFinished!";
-                echo -e "\e[1;33mLogin to the account $USERNAME with \e[1;37msu $USERNAME\e[1;33m and run the command; $SRVNAME start"
-                echo -e "For more help please run the command; $SRVNAME help"
-                echo -e "\e[1;36m"
-                read -p "Press the [Enter] key to return to menu.";
-                echo -e "\e[0m"
-             ServerMenu
-            ;;
-        "Install Spigot Minecraft Server")
-           _repeat="Y"
-
-            while [ $_repeat = "Y" ]
-            do
-                    # Do whatever your tasks are
-                    echo -e "\e[1;32mEnter the name of the user you want to own the server process. Default is mcServer"
-                    echo -e "\e[2;97m";
-                    read NEWUSERNAME
-                    [ -n "$NEWUSERNAME" ] && USERNAME=$NEWUSERNAME
-                    echo -e "\e[1;32mEnter the name of the server. Default is mcServer"
-                    echo -e "\e[2;97m";
-                    read NEWSRVNAME
-                    [ -n "$NEWSRVNAME" ] && SRVNAME=$NEWSRVNAME
-                    echo -e "\e[1;32mEnter the path of the directory where the server should reside. Default is /srv/mcServer"
-                    echo -e "\e[2;97m";
-                    read NEWSRV_DIR
-                    [ -n "$NEWSRV_DIR" ] && SRV_DIR=$NEWSRV_DIR
-                    echo -e "\e[1;32mEnter the path for the directory where backups will be stored. Default is /home/mcServer/mcbackups"
-                    echo -e "\e[2;97m";
-                    read NEWBACKUP_DIR
-                    [ -n "$NEWBACKUP_DIR" ] && BACKUP_DIR=$NEWBACKUP_DIR
-                    # Prompt for repeat
-                    echo -e "\e[1;34mYou Entered:\nUser: $USERNAME\nServer Name: $SRVNAME\nServer Directory: $SRV_DIR\nBackup Directory: $BACKUP_DIR"
-                    echo -e "\e[2;97m";
-                    echo -e "\e[1;33m";
-                    echo -n "Is this correct? (Y/N)"
-                    read -n1 Input
-                    echo # Completes the line
-                    case $Input in
-                            [Yy]):
-                            _repeat="N"
-                            ;;
-                    esac
-            done
-           _repeat="Y"
-            while [ $_repeat = "Y" ]
-            do
-                    # Do whatever your tasks are
-                    echo -e "\e[1;32mEnter the number of CPU cores you have. Default is  $CPU_COUNT"
-                    echo -e "\e[2;97m";
-                    read NEWCPU_COUNT
-                    [ -n "$NEWCPU_COUNT" ] && CPU_COUNT=$NEWCPU_COUNT
-                    echo -e "\e[1;32mEnter the initial RAM amount to dedicate to the server in Megabytes or Gigabytes. Default is $INITRAM"
-                    echo -e "Please specify with a M or G after the size."
-                    echo -e "\e[2;97m";
-                    read NEWINITRAM
-                    [ -n "$NEWINITRAM" ] && INITRAM=$NEWINITRAM
-                    echo -e "\e[1;32mEnter the maximum RAM amount to dedicate to the server in Megabytes or Gigabytes. Default is  $MAXRAM"
-                    echo -e "Please specify with a M or G."
-                    echo -e "\e[2;97m";
-                    read NEWMAXRAM
-                    [ -n "$NEWMAXRAM" ] && MAXRAM=$NEWMAXRAM
-                    # Prompt for repeat
-                    echo -e "\e[1;32mYou Entered:\nCPU Count: $CPU_COUNT\nMinimum RAM: $INITRAM\nMaximum RAM: $MAXRAM"
-                    echo -e "\e[1;33m";
-                    echo -n "Is this correct? (Y/N)"
-                    read -n1 Input
-                    echo # Completes the line
-                    case $Input in
-                            [Yy]):
-                            _repeat="N"
-                            ;;
-                    esac
-            done
-
-            echo -e "\e[1;31mThis requires root access:";
-	    echo -e "\e[1;32mInstalling dependencies; screen, tar, and rsync.";
-            echo -e "\e[2;97m";
-            sudo apt-get update
-            sudo apt-get install screen tar rsync
-            echo -e "\e[1;32mAdding Minecraft Server User $USERNAME";
-            echo -e "\e[1;36mPlease enter a strong password when prompted."
-            echo -e "\e[2;97m";
-            sleep .5
-            sudo adduser $USERNAME --force-badname
-            echo -e "\e[1;32mCreating Minecraft Server Directory in $SRV_DIR";
-            echo -e "\e[2;97m";
-            sudo mkdir -p $SRV_DIR/bin
-            sudo mkdir -p $SRV_DIR/world_storage
-            sleep .5
-            echo -e "\e[1;32mCreating Minecraft Server Backup Directory in $BACKUP_DIR";
-            echo -e "\e[2;97m";
-            sudo mkdir -p $BACKUP_DIR
-            sudo mkdir -p $BACKUP_DIR/logs
-            sudo mkdir -p $BACKUP_DIR/server
-            sudo mkdir -p $BACKUP_DIR/worlds
-            sudo mkdir -p $BACKUP_DIR/latest
-            sudo mkdir -p $BACKUP_DIR/archive
-            sleep .5
-            echo -e "\e[1;32mSetting Permissions for $SRV_DIR for first server run";
-            echo -e "\e[1;97m";
-            sudo chmod 777 -R $SRV_DIR
-            sudo chmod 777 -R $BACKUP_DIR
-            sleep .5
-            echo -e "\e[1;32mAdding User - $CUR_USR to $USERNAME group."
-            sudo usermod -a -G $USERNAME $CUR_USR
-            sleep .5
-            echo -e "\e[1;32mDownloading Vanilla Minecraft Server .jar to $SRV_DIR"
-            echo -e "\e[1;97m";
-            wget https://s3.amazonaws.com/Minecraft.Download/versions/1.8.1/minecraft_server.1.8.1.jar -O $SRV_DIR/minecraft_server.jar
-            echo -e "\e[1;33mMojang EULA can be read at (https://account.mojang.com/documents/minecraft_eula)."
-            echo -e "\e[1;36m";
-            read -p "Press the [Enter] key to accept the EULA.";
-            echo eula=true >> $SRV_DIR/eula.txt
-            sleep 3
-            clear
-            echo -e "\e[1;32mStarting the server for the first time."
-            for i in {77..76} {76..77} ; do echo -en "\e[38;5;${i}m################\e[0m" ; done ; echo
-            echo -e "\e[1;31mWhen the server finishes starting up type STOP and the script will continue.\n Ignore the errors!!"
-            read -p "Press the [Enter] key when you have read the instructions.";
-            echo -e "\e[1;97m";
-            cd $SRV_DIR
-            java -Xmx512M -Xms512M -jar minecraft_server.jar nogui
-            rm mincraft_server.jar
-            echo -e "\e[1;32mFetching the scripts for Minecraft Server."
-            echo -e "\e[2;97m";
-            wget http://www.icarey.net/minecraft/mcscripts.tar.gz -O $SRV_DIR/bin/mcscripts.tar.gz
-            cd $SRV_DIR/bin
-            tar -xvzf mcscripts.tar.gz
-            rm mcscripts.tar.gz
-            sleep .5
-            echo -e "\e[1;32mGenerating init script config for Vanilla Minecraft Server."
-            echo -e "\e[2;97m";
-            sleep 2
-            echo '#!/bin/bash
-#
-# Settings file for minecraft-init
-# ================================
-#
-# Make a copy of this file named config
-# and edit the variables to your needs.
-#
-
-# Name of vanilla server jar (no need to change if you are running craftbukkit and vice versa)
-MC_JAR="minecraft_server.jar"
-
-# Name of craftbukkit jar
-CB_JAR="craftbukkit.jar"
-
-# Name of the spigot jar
-SP_JAR="spigot.jar"
-
-# Define the release of CraftBukkit to use (stable or unstable)
-CB_RELEASE="stable"
-
-# Name of server.jar to use (either $MC_JAR or $CB_JAR)
-SERVICE=$SP_JAR
-
-# Name to use for the screen instance
-SCREEN="'"$SRVNAME"'"
-
-# User that should run the server
-USERNAME="'"$USERNAME"'"
-
-# Path to minecraft server directory
-MCPATH="'"$SRV_DIR"'"
-
-# Path to server log file ($MCPATH/server.log on older versions)
-SERVERLOG="${MCPATH}/logs/latest.log"
-
-# Where the worlds are located on the disk. Can not be the same as MCPATH.
-# You need to move your worlds to this directory manually, the script
-# will then handle the nessessay symlinks.
-WORLDSTORAGE="${MCPATH}/world_storage"
-
-# Number of CPUs/cores to use
-CPU_COUNT='"$CPU_COUNT"'
-
-# Initial memory usage
-INITMEM="'"$INITRAM"'"
-
-# Maximum amount of memory to use
-# Remember: give the ramdisk enough space, subtract from the total amount
-# of RAM available the size of your map and the RAM-consumption of your base system.
-MAXMEM="'"$MAXRAM"'"
-
-
-# Settings for backups
-# ===============================
-
-# Location for world backups
-BACKUPPATH="'"$BACKUP_DIR"'/worlds"
+BACKUPPATH="'"$BACKUP_DIR"'/latest"
 
 # Where the whole minecraft directory is copied when whole-backup is executed
 # whole-backup is a complete uncompressed backup of the whole server folder.
@@ -789,7 +473,7 @@ INVOCATION="java -Xmx$MAXMEM -Xms$INITMEM -XX:+UseConcMarkSweepGC -XX:+CMSIncrem
 
 # Path to the the mounted ramdisk (the default will work in most senarios).
 RAMDISK="/dev/shm"' | tee $SRV_DIR/bin/config
-                sudo -su $USERNAME echo '[Settings]
+                echo '[Settings]
 backups_dir = '"$BACKUP_DIR"'/latest/
 archives_dir = '"$BACKUP_DIR"'/archives/
 hourly_backup_hour = 23
@@ -798,7 +482,6 @@ max_weekly_backups = 52
 backup_extensions = "tar.gz",".tar.bz2",".jar"
 log_level = ERROR' | sudo -u $USERNAME tee /home/$USERNAME/.rotate-backupsrc
                 echo "alias $SRVNAME=$SRV_DIR/bin/script.servermgmt.sh" | sudo -u $USERNAME tee /home/$USERNAME/.bash_aliases
-                echo "alias $SRVNAME=$SRV_DIR/bin/script.servermgmt.sh" >> ~/.bash_aliases
                 clear
                 echo -e "\e[1;32mInstalling Default Cronjobs in Crontab.";
                 echo -e "\e[1;97m"
@@ -807,24 +490,350 @@ log_level = ERROR' | sudo -u $USERNAME tee /home/$USERNAME/.rotate-backupsrc
 ( crontab -l | grep -v "'"$CRONCMD_LOGROLL"'" ; echo "'"$CRONJOB_LOGROLL"'" ) | crontab -
 ( crontab -l | grep -v "'"$CRONCMD_TODISK"'" ; echo "'"$CRONJOB_TODISK"'" ) | crontab -
 ( crontab -l | grep -v "'"$CRONCMD_BACKUPROTATE"'" ; echo "'"$CRONJOB_BACKUPROTATE"'" ) | crontab -
+( crontab -l | grep -v "'"$CRONCMD_WARN"'" ; echo "'"$CRONJOB_WARN"'" ) | crontab -
 ( crontab -l | grep -v "'"$CRONCMD_RESTART"'" ; echo "'"$CRONJOB_RESTART"'" ) | crontab -' > $SRV_DIR/bin/cron.sh
                 cd $SRV_DIR/bin
                 sudo -u $USERNAME bash cron.sh
                 rm cron.sh
-                echo -e "\e[1;32mIf there is no Crontab, Crontab will use a blank file"
+                echo -e "\e[1;32mIf there is no Crontab, Crontab will append to a blank file"
                 echo -e "\e[1;32mSetting permissions on $SRV_DIR and Init Script."
                 echo -e "\e[2;1;97m"
                 sleep 2
                 cd $SRV_DIR
                 mv world $SRV_DIR/world_storage/
-                cp /home/$CUR_USR/spigot/spigot-1.8.jar $SRV_DIR/spigot.jar
+                sudo chmod 755 -R $SRV_DIR
+                sudo chmod 755 -R $BACKUP_DIR
+                sudo chown $USERNAME:$USERNAME -R $SRV_DIR
+                sudo chown $USERNAME:$USERNAME -R $BACKUP_DIR
+                sudo chmod a+x -R $SRV_DIR/bin/script.*
+                echo -e "\e[1;32mFinished!";
+                echo -e "\e[1;33mLogin to the account $USERNAME via SSH or Terminal and run the command; $SRVNAME start"
+                echo -e "For more help please run the command; $SRVNAME help"
+                echo -e "\e[1;36m"
+                read -p "Press the [Enter] key to return to menu.";
+                echo -e "\e[0m"
+             ServerMenu
+            ;;
+        "Install Spigot Minecraft Server")
+           echo -e "\e[1;32m"
+           read -p "Did you compile the spigot.jar?" -n 1 -r
+		echo    # (optional) move to a new line
+	   if [[ ! $REPLY =~ ^[Yy]$ ]]
+               then
+                  echo -e "\e[1;31m Please compile the Spigot 1.8 jar.\e[2;97m"
+                  sleep 2
+                  ServerMenu
+           fi
+
+            _repeat="Y"
+
+            while [ $_repeat = "Y" ]
+            do
+                    # Do whatever your tasks are
+                    echo -e "\e[1;32mEnter the name of the user you want to own the server process. Example - minecraft"
+                    echo -e "\e[2;97m";
+                    read NEWUSERNAME
+                    [ -n "$NEWUSERNAME" ] && USERNAME=$NEWUSERNAME
+                    echo -e "\e[1;32mEnter the name of the server. Example - minecraft_creative"
+                    echo -e "\e[2;97m";
+                    read NEWSRVNAME
+                    [ -n "$NEWSRVNAME" ] && SRVNAME=$NEWSRVNAME
+                    echo -e "\e[1;32mEnter the path of the directory where the server should reside. Example - /srv/minecraft_serverr"
+                    echo -e "\e[2;97m";
+                    read NEWSRV_DIR
+                    [ -n "$NEWSRV_DIR" ] && SRV_DIR=$NEWSRV_DIR
+                    echo -e "\e[1;32mEnter the path for the directory where backups will be stored. Example - /home/minecraft/mcbackups"
+                    echo -e "\e[2;97m";
+                    read NEWBACKUP_DIR
+                    [ -n "$NEWBACKUP_DIR" ] && BACKUP_DIR=$NEWBACKUP_DIR
+                    # Prompt for repeat
+                    echo -e "\e[1;34mYou Entered:\nUser: $USERNAME\nServer Name: $SRVNAME\nServer Directory: $SRV_DIR\nBackup Directory: $BACKUP_DIR"
+                    echo -e "\e[2;97m";
+                    echo -e "\e[1;33m";
+                    echo -n "Is this correct? (Y/N)"
+                    read -n1 Input
+                    echo # Completes the line
+                    case $Input in
+                            [Yy]):
+                            _repeat="N"
+                            ;;
+                    esac
+            done
+           _repeat="Y"
+            while [ $_repeat = "Y" ]
+            do
+                    # Do whatever your tasks are
+                    echo -e "\e[1;32mEnter the number of CPU cores you have. Example - 2"
+                    echo -e "\e[2;97m";
+                    read NEWCPU_COUNT
+                    [ -n "$NEWCPU_COUNT" ] && CPU_COUNT=$NEWCPU_COUNT
+                    echo -e "\e[1;32mEnter the initial RAM amount to dedicate to the server in Megabytes or Gigabytes."
+                    echo -e "Please specify with a M or G after the size."
+                    echo -e "Example - 1024M or 1G"
+                    echo -e "\e[2;97m";
+                    read NEWINITRAM
+                    [ -n "$NEWINITRAM" ] && INITRAM=$NEWINITRAM
+                    echo -e "\e[1;32mEnter the maximum RAM amount to dedicate to the server in Megabytes or Gigabytes."
+                    echo -e "Please specify with a M or G."
+                    echo -e "Example - 4096M or 4G"
+                    echo -e "\e[2;97m";
+                    read NEWMAXRAM
+                    [ -n "$NEWMAXRAM" ] && MAXRAM=$NEWMAXRAM
+                    # Prompt for repeat
+                    echo -e "\e[1;32mYou Entered:\nCPU Count: $CPU_COUNT\nMinimum RAM: $INITRAM\nMaximum RAM: $MAXRAM"
+                    echo -e "\e[1;33m";
+                    echo -n "Is this correct? (Y/N)"
+                    read -n1 Input
+                    echo # Completes the line
+                    case $Input in
+                            [Yy]):
+                            _repeat="N"
+                            ;;
+                    esac
+            done
+
+####################################
+###CRONJOBS TO ADD DURING INSTALL###
+####################################
+CRONCMD_BACKUP="$SRV_DIR/bin/script.servermgmt.sh minecraft backup"
+CRONJOB_BACKUP="0  *  *  *  * $CRONCMD_BACKUP"
+CRONCMD_BACKUPROTATE="$SRV_DIR/bin/rotate-backups.py > /dev/null"
+CRONJOB_BACKUPROTATE="30  *  *  *  * $CRONCMD_BACKUPROTATE"
+CRONCMD_LOGROLL="$SRV_DIR/bin/script.servermgmt.sh log-roll"
+CRONJOB_LOGROLL="55  04  *  *  * $CRONCMD_LOGROLL"
+CRONCMD_TODISK="$SRV_DIR/bin/script.servermgmt.sh to-disk"
+CRONJOB_TODISK="*/15  *  *  *  * $CRONCMD_TODISK"
+CRONCMD_WARN="$SRV_DIR/bin/script.servermgmt.sh say SERVER RESTART IN 5 MINUTES"
+CRONJOB_WARN="0  05  *  *  * $CRONCMD_WARN"
+CRONCMD_RESTART="$SRV_DIR/bin/script.servermgmt.sh restart"
+CRONJOB_RESTART="5  05  *  *  * $CRONCMD_RESTART"
+#Moved here to read variable from user input
+############################################
+
+            echo -e "\e[1;31mThis requires root access:";
+	    echo -e "\e[1;32mInstalling dependencies; screen, tar, and rsync.";
+            echo -e "\e[2;97m";
+            sudo apt-get update
+            sudo apt-get install screen tar rsync
+            echo -e "\e[1;32mAdding Minecraft Server User $USERNAME";
+            echo -e "\e[1;36mPlease enter a strong password when prompted."
+            echo -e "\e[2;97m";
+            sleep .5
+            sudo adduser $USERNAME --force-badname
+            echo -e "\e[1;32mCreating Minecraft Server Directory in $SRV_DIR";
+            echo -e "\e[2;97m";
+            sudo mkdir -p $SRV_DIR/bin
+            sudo mkdir -p $SRV_DIR/world_storage
+            sleep .5
+            echo -e "\e[1;32mCreating Minecraft Server Backup Directory in $BACKUP_DIR";
+            echo -e "\e[2;97m";
+            sudo mkdir -p $BACKUP_DIR
+            sudo mkdir -p $BACKUP_DIR/logs
+            sudo mkdir -p $BACKUP_DIR/server
+            sudo mkdir -p $BACKUP_DIR/latest
+            sudo mkdir -p $BACKUP_DIR/archives
+            sleep .5
+            echo -e "\e[1;32mSetting Permissions for $SRV_DIR for first server run";
+            echo -e "\e[1;97m";
+            sudo chmod 777 -R $SRV_DIR
+            sudo chmod 777 -R $BACKUP_DIR
+            sleep 1
+            echo -e "\e[1;32mCopying Spigot Minecraft Server .jar to $SRV_DIR"
+            echo -e "\e[1;97m";
+            cp /home/$CUR_USR/spigot/spigot-1.8.jar $SRV_DIR/spigot.jar
+            echo -e "\e[1;33mMojang EULA can be read at (https://account.mojang.com/documents/minecraft_eula)."
+            echo -e "\e[1;36m";
+            read -p "Press the [Enter] key to accept the EULA.";
+            echo eula=true >> $SRV_DIR/eula.txt
+            sleep 3
+            clear
+            echo -e "\e[1;32mStarting the server for the first time."
+            for i in {77..76} {76..77} ; do echo -en "\e[38;5;${i}m################\e[0m" ; done ; echo
+            echo -e "\e[1;31mWhen the server finishes starting up type STOP and the script will continue.\n Ignore the errors!!"
+            read -p "Press the [Enter] key when you have read the instructions.";
+            echo -e "\e[1;97m";
+            cd $SRV_DIR
+            java -Xmx512M -Xms512M -jar spigot.jar nogui
+            echo -e "\e[1;32mFetching the scripts for Minecraft Server."
+            echo -e "\e[2;97m";
+            wget http://www.icarey.net/minecraft/mcscripts.tar.gz -O $SRV_DIR/bin/mcscripts.tar.gz
+            cd $SRV_DIR/bin
+            tar -xvzf mcscripts.tar.gz
+            rm mcscripts.tar.gz
+            sleep .5
+            echo -e "\e[1;32mGenerating Server Management Script config for Spigot Server"
+            echo -e "\e[2;97m";
+            sleep 2
+            echo '#!/bin/bash
+#
+# Settings file for minecraft-init
+# ================================
+#
+# Make a copy of this file named config
+# and edit the variables to your needs.
+#
+
+# Name of vanilla server jar (no need to change if you are running craftbukkit and vice versa)
+MC_JAR="minecraft_server.jar"
+
+# Name of craftbukkit jar
+CB_JAR="craftbukkit.jar"
+
+# Name of the spigot jar
+SP_JAR="spigot.jar"
+
+# Define the release of CraftBukkit to use (stable or unstable)
+CB_RELEASE="stable"
+
+# Name of server.jar to use (either $MC_JAR or $CB_JAR)
+SERVICE=$SP_JAR
+
+# Name to use for the screen instance
+SCREEN="'"$SRVNAME"'"
+
+# User that should run the server
+USERNAME="'"$USERNAME"'"
+
+# Path to minecraft server directory
+MCPATH="'"$SRV_DIR"'"
+
+# Path to server log file ($MCPATH/server.log on older versions)
+SERVERLOG="${MCPATH}/logs/latest.log"
+
+# Where the worlds are located on the disk. Can not be the same as MCPATH.
+# You need to move your worlds to this directory manually, the script
+# will then handle the nessessay symlinks.
+WORLDSTORAGE="${MCPATH}/world_storage"
+
+# Number of CPUs/cores to use
+CPU_COUNT='"$CPU_COUNT"'
+
+# Initial memory usage
+INITMEM="'"$INITRAM"'"
+
+# Maximum amount of memory to use
+# Remember: give the ramdisk enough space, subtract from the total amount
+# of RAM available the size of your map and the RAM-consumption of your base system.
+MAXMEM="'"$MAXRAM"'"
+
+# Whether to output commands for the plugin ConsoleLikeChat ($1 is the command $
+FORMAT='"'"'$1'"'"'
+
+# Settings for backups
+# ===============================
+
+# Location for world backups
+BACKUPPATH="'"$BACKUP_DIR"'/latest"
+
+# Where the whole minecraft directory is copied when whole-backup is executed
+# whole-backup is a complete uncompressed backup of the whole server folder.
+WHOLEBACKUP="'"$BACKUP_DIR"'/server"
+
+# Format for world backup (tar or zip).
+BACKUPFORMAT="tar"
+
+# Normally backups will be put in a subfolder to $BACKUPPATH with todays date
+# and the backups themselves will have a timestamp.
+
+# But if BACKUPSCRIPTCOMPATIBLE is set the world backups will be put directly
+# in $BACKUPPATH without timestamp to be compatible with
+# [backup rotation script](https://github.com/adamfeuer/rotate-backups)
+#
+BACKUPSCRIPTCOMPATIBLE=YES
+
+# If WORLDEDITCOMPATIBLE is set the world backups will be created compatible to WorldEdit
+# in $BACKUPPATH as WORLD_NAME/DATE.(tar.bz2|zip) with the requested directory structure
+#
+# WORLDEDITCOMPATIBLE=YES
+
+# Compress the whole backup with bzip2?
+# Note that this may not save a lot of disk space since there can be a lot of files
+# in your server directory, that are already compressed, but it can slow down the
+# backup a bit. This highly depends on the plugins you are using.
+#
+# For example: The png files generated by Dynmap are already compressed and still use
+# a lot of space in your server directory, so the compression ratio of the compressed
+# backup will not be very high.
+COMPRESS_WHOLEBACKUP=YES
+
+
+# Settings for log rolling
+# ===============================
+
+# Location for old logs
+# Used by the log-roll command
+LOGPATH="'"$BACKUP_DIR"'/logs"
+
+# Whether or not to gzip logs (must be commented out for no - DO NOT CHANGE TO NO)
+#
+GZIPLOGS=YES
+
+# What to append to the logfile name (Leave blank for nothing)
+LOGFILEAPPEND="logfile_"
+
+
+# Settings for overviewer command
+# ===============================
+
+# Where the Map is generated
+OUTPUTMAP="/home/'"${USERNAME}"'/mc-overviewer/render"
+
+# Path to Minecraft-Overviewer
+OVPATH="/home/'"${USERNAME}"'/mc-overviewer/Minecraft-Overviewer"
+
+# Path for the config file of Overviewer
+OVCONFIGPATH="/home/'"${USERNAME}"'/mc-overviewer"
+
+# Name of Overviewer config file
+OVCONFIGNAME="config.py"
+
+# Path for backup worlds
+OVBACKUP="/home/'"${USERNAME}"'/mc-overviewer/overviewerbackups"
+
+# Things to leave alone ;)
+# =====================
+
+INVOCATION="java -Xmx$MAXMEM -Xms$INITMEM -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+AggressiveOpts -jar $SERVICE nogui"
+
+# Path to the the mounted ramdisk (the default will work in most senarios).
+RAMDISK="/dev/shm"' | tee $SRV_DIR/bin/config
+                echo '[Settings]
+backups_dir = '"$BACKUP_DIR"'/latest/
+archives_dir = '"$BACKUP_DIR"'/archives/
+hourly_backup_hour = 23
+weekly_backup_day = 6
+max_weekly_backups = 52
+backup_extensions = "tar.gz",".tar.bz2",".jar"
+log_level = ERROR' | sudo -u $USERNAME tee /home/$USERNAME/.rotate-backupsrc
+                echo "alias $SRVNAME=$SRV_DIR/bin/script.servermgmt.sh" | sudo -u $USERNAME tee /home/$USERNAME/.bash_aliases
+                clear
+                echo -e "\e[1;32mInstalling Default Cronjobs in Crontab.";
+                echo -e "\e[1;97m"
+                sleep 1
+               echo '( crontab -l | grep -v "'"$CRONCMD_BACKUP"'" ; echo "'"$CRONJOB_BACKUP"'" ) | crontab -
+( crontab -l | grep -v "'"$CRONCMD_LOGROLL"'" ; echo "'"$CRONJOB_LOGROLL"'" ) | crontab -
+( crontab -l | grep -v "'"$CRONCMD_TODISK"'" ; echo "'"$CRONJOB_TODISK"'" ) | crontab -
+( crontab -l | grep -v "'"$CRONCMD_BACKUPROTATE"'" ; echo "'"$CRONJOB_BACKUPROTATE"'" ) | crontab -
+( crontab -l | grep -v "'"$CRONCMD_WARN"'" ; echo "'"$CRONJOB_WARN"'" ) | crontab -
+( crontab -l | grep -v "'"$CRONCMD_RESTART"'" ; echo "'"$CRONJOB_RESTART"'" ) | crontab -' > $SRV_DIR/bin/cron.sh
+                cd $SRV_DIR/bin
+                sudo -u $USERNAME bash cron.sh
+                rm cron.sh
+                echo -e "\e[1;32mIf there is no Crontab, Crontab will append to a blank file"
+                echo -e "\e[1;32mSetting permissions on $SRV_DIR and Management Scripts."
+                echo -e "\e[2;1;97m"
+                sleep 2
+                cd $SRV_DIR
+                mv world $SRV_DIR/world_storage/
+                mv world_nether $SRV_DIR/world_storage/
+                mv world_the_end $SRV_DIR/world_storage/
                 sudo chmod 755 -R $SRV_DIR
                 sudo chmod 755 -R $BACKUP_DIR
                 sudo chown $USERNAME:$USERNAME -R $SRV_DIR
                 sudo chown $USERNAME:$USERNAME -R $BACKUP_DIR
                 sudo chmod a+x -R $SRV_DIR/bin/*
                 echo -e "\e[1;32mFinished!";
-                echo -e "\e[1;33mLogin to the account $USERNAME with \e[1;37msu $USERNAME\e[1;33m and run the command; $SRVNAME start"
+                echo -e "\e[1;33mLogin to the account $USERNAME via SSH or terminal and run the command; $SRVNAME start"
                 echo -e "For more help please run the command; $SRVNAME help"
                 echo -e "\e[1;36m"
                 read -p "Press the [Enter] key to return to menu.";
