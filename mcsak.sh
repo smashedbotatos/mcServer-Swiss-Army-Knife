@@ -1,7 +1,7 @@
 #!/bin/bash
 # Title: mcswak.sh
 # Author: Ian Carey (carian94) (carian94@gmail.com)
-#Version 1.20.2015
+#Version 2.6.2015
 # Description: Multi functional Minecraft server Bash script
 # Copyright (C) 2010-2015 Ian Carey
 #
@@ -271,9 +271,9 @@ do
 ####################################
 ###CRONJOBS TO ADD DURING INSTALL###
 ####################################
-CRONCMD_BACKUP="$SRV_DIR/bin/script.servermgmt.sh minecraft backup"
+CRONCMD_BACKUP="$SRV_DIR/bin/script.servermgmt.sh backup"
 CRONJOB_BACKUP="0  *  *  *  * $CRONCMD_BACKUP"
-CRONCMD_BACKUPROTATE="$SRV_DIR/bin/rotate-backups.py > /dev/null"
+CRONCMD_BACKUPROTATE="$SRV_DIR/bin/script.rotate-backups.py > /dev/null"
 CRONJOB_BACKUPROTATE="30  *  *  *  * $CRONCMD_BACKUPROTATE"
 CRONCMD_LOGROLL="$SRV_DIR/bin/script.servermgmt.sh log-roll"
 CRONJOB_LOGROLL="55  04  *  *  * $CRONCMD_LOGROLL"
@@ -595,9 +595,9 @@ log_level = ERROR' | sudo -u $USERNAME tee /home/$USERNAME/.rotate-backupsrc
 ####################################
 ###CRONJOBS TO ADD DURING INSTALL###
 ####################################
-CRONCMD_BACKUP="$SRV_DIR/bin/script.servermgmt.sh minecraft backup"
+CRONCMD_BACKUP="$SRV_DIR/bin/script.servermgmt.sh backup"
 CRONJOB_BACKUP="0  *  *  *  * $CRONCMD_BACKUP"
-CRONCMD_BACKUPROTATE="$SRV_DIR/bin/rotate-backups.py > /dev/null"
+CRONCMD_BACKUPROTATE="$SRV_DIR/bin/script.rotate-backups.py > /dev/null"
 CRONJOB_BACKUPROTATE="30  *  *  *  * $CRONCMD_BACKUPROTATE"
 CRONCMD_LOGROLL="$SRV_DIR/bin/script.servermgmt.sh log-roll"
 CRONJOB_LOGROLL="55  04  *  *  * $CRONCMD_LOGROLL"
